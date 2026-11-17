@@ -1,4 +1,4 @@
-# Deligo Technologies — Next-Gen IT Startup Agency Website & Owner CRM
+# DELIGO TECHNOLOGIES — Next-Gen IT Startup Agency Website & Owner CRM
 
 > A premier, high-converting digital agency platform engineered with **React 18 + PHP + MySQL**, inspired by the design and technical excellence of **[Lilac Infotech](https://lilacinfotech.com)**.
 
@@ -107,21 +107,22 @@ You can open `frontend/index.html` directly in any web browser without starting 
 This repository is pre-configured with automated GitHub Actions and multi-mode support for **GitHub Pages**:
 
 #### Step 1: Link and Push to GitHub
-Create a new empty repository on [GitHub](https://github.com/new) (e.g. `it-startup-agency` or `deligo-technologies`), then run:
+Create a new repository named **`deligo-technologies`** on [GitHub](https://github.com/new), then run:
 ```bash
-git remote add origin https://github.com/<your-github-username>/<your-repo-name>.git
+git remote add origin https://github.com/<your-github-username>/deligo-technologies.git
 git branch -M main
 git push -u origin main
 ```
+*(For user `arshadrahiman`, the remote URL is: `https://github.com/arshadrahiman/deligo-technologies.git`)*
 
 #### Step 2: Enable GitHub Pages in Repository Settings
 1. On GitHub, navigate to your repository's **Settings** tab.
 2. Click **Pages** in the left navigation sidebar.
 3. Under **Build and deployment > Source**:
-   - **Recommended (Zero Config)**: Select **GitHub Actions**. The included workflow (`.github/workflows/deploy.yml`) automatically builds and publishes the site on every push.
+   - **Recommended (Zero Config)**: Select **GitHub Actions**. The included workflow (`.github/workflows/deploy.yml`) automatically publishes the site on every push.
    - **Alternative**: Select **Deploy from a branch** and choose branch `main` with folder `/docs`.
-4. Your website is live in ~60 seconds at:
-   **`https://<your-github-username>.github.io/<your-repo-name>/`**
+4. Your website will be live in ~60 seconds at:
+   **`https://<your-github-username>.github.io/deligo-technologies/`**
 
 > **Static Hosting Delight**: On GitHub Pages, form submissions, the interactive Scope Estimator, status changes, CRM notes, and instant CSV downloads operate seamlessly with native browser persistence.
 
