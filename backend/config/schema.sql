@@ -1,8 +1,8 @@
 -- Deligo Technologies - MySQL Database Schema
 -- Compatible with MySQL 5.7+ and MySQL 8.0+
 
-CREATE DATABASE IF NOT EXISTS `deligo_db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `deligo_db`;
+-- CREATE DATABASE IF NOT EXISTS `deligo_db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- USE `deligo_db`;
 
 -- Enquiries / Leads Table
 CREATE TABLE IF NOT EXISTS `enquiries` (

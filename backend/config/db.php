@@ -10,12 +10,12 @@ class Database {
     private static ?PDO $instance = null;
     private static string $driverUsed = 'mysql';
 
-    // MySQL Configuration (Edit these or set environment variables)
-    private static string $host = '127.0.0.1';
+    // MySQL Configuration (DirectAdmin / Production)
+    private static string $host = 'localhost';
     private static string $port = '3306';
-    private static string $dbName = 'deligo_db';
-    private static string $username = 'root';
-    private static string $password = '';
+    private static string $dbName = 'deligote_deligo_db';
+    private static string $username = 'deligote_deligo_db';
+    private static string $password = 'QrGQhRqGJH7RjUYNjGj6';
 
     public static function getConnection(): PDO {
         if (self::$instance !== null) {
@@ -40,6 +40,10 @@ class Database {
             ];
             self::$instance = new PDO($dsn, $username, $password, $options);
             self::$driverUsed = 'mysql';
+
+            // Auto-initialize MySQL tables if not yet imported
+            self::initMysqlSchema(self::$instance);
+
             return self::$instance;
         } catch (PDOException $e) {
             // Log fallback in dev
@@ -135,6 +139,24 @@ class Database {
         (3, 'Account Manager', 'Proposal draft v2 delivered with 8-week sprint roadmap.');
         ";
         $pdo->exec($seed);
+    }
+
+    private static function initMysqlSchema(PDO $pdo): void {
+        try {
+            $check = $pdo->query("SHOW TABLES LIKE 'enquiries'");
+            if ($check && $check->rowCount() === 0) {
+                $schemaFile = __DIR__ . '/schema.sql';
+                if (file_exists($schemaFile)) {
+                    $sql = file_get_contents($schemaFile);
+                    // Strip database creation and use statements so it executes in current database
+                    $sql = preg_replace('/CREATE DATABASE[^;]+;/i', '', $sql);
+                    $sql = preg_replace('/USE[^;]+;/i', '', $sql);
+                    $pdo->exec($sql);
+                }
+            }
+        } catch (Throwable $t) {
+            error_log("MySQL auto-schema check note: " . $t->getMessage());
+        }
     }
 }
 
