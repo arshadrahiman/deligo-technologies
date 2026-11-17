@@ -15,6 +15,10 @@ backend/data/*.sqlite-wal
 backend/data/*.sqlite-shm
 *.log
 
+# Archives
+*.zip
+*.tar.gz
+
 # Editor & IDE
 .vscode/
 .idea/
