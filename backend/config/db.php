@@ -11,6 +11,8 @@ class Database {
     private static string $driverUsed = 'mysql';
 
     // MySQL Configuration (DirectAdmin / Production)
+    // In DirectAdmin/cPanel, PHP scripts running on the web server connect to MySQL via 'localhost'
+    // or '127.0.0.1'. The server host 'cloud-da2.xdnscloud.com' is also supported.
     private static string $host = 'localhost';
     private static string $port = '3306';
     private static string $dbName = 'deligote_deligo_db';
@@ -23,31 +25,39 @@ class Database {
         }
 
         // Allow environment overrides
-        $host = getenv('DB_HOST') ?: self::$host;
+        $configuredHost = getenv('DB_HOST') ?: self::$host;
         $port = getenv('DB_PORT') ?: self::$port;
         $dbName = getenv('DB_NAME') ?: self::$dbName;
         $username = getenv('DB_USER') ?: self::$username;
         $password = getenv('DB_PASS') ?: self::$password;
 
-        // Try MySQL first
-        try {
-            $dsn = "mysql:host={$host};port={$port};dbname={$dbName};charset=utf8mb4";
-            $options = [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
-                PDO::ATTR_TIMEOUT => 2,
-            ];
-            self::$instance = new PDO($dsn, $username, $password, $options);
-            self::$driverUsed = 'mysql';
+        // Try MySQL hosts in order: configured host (localhost), loopback (127.0.0.1), and DirectAdmin hostname
+        $candidateHosts = array_unique([$configuredHost, 'localhost', '127.0.0.1', 'cloud-da2.xdnscloud.com']);
+        $lastException = null;
 
-            // Auto-initialize MySQL tables if not yet imported
-            self::initMysqlSchema(self::$instance);
+        foreach ($candidateHosts as $h) {
+            try {
+                $dsn = "mysql:host={$h};port={$port};dbname={$dbName};charset=utf8mb4";
+                $options = [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false,
+                    PDO::ATTR_TIMEOUT => 2,
+                ];
+                self::$instance = new PDO($dsn, $username, $password, $options);
+                self::$driverUsed = 'mysql';
 
-            return self::$instance;
-        } catch (PDOException $e) {
-            // Log fallback in dev
-            error_log("MySQL connection failed: " . $e->getMessage() . ". Falling back to SQLite local database.");
+                // Auto-initialize MySQL tables if not yet imported
+                self::initMysqlSchema(self::$instance);
+
+                return self::$instance;
+            } catch (PDOException $e) {
+                $lastException = $e;
+            }
+        }
+
+        if ($lastException) {
+            error_log("MySQL connection attempts failed: " . $lastException->getMessage() . ". Falling back to local SQLite database.");
         }
 
         // Fallback to SQLite so local testing runs without friction
