@@ -266,6 +266,23 @@ class RequestHandler(SimpleHTTPRequestHandler):
 
         if path.startswith('/api/admin') or path == '/api/admin.php':
             action = parse_qs(parsed.query).get('action', [data.get('action', '')])[0]
+
+            if action == 'login':
+                username = data.get('username', '').strip().lower()
+                password = data.get('password', '')
+                valid_users = ['admin', 'owner', 'deligo_admin', 'admin@deligotechnologies.com']
+                valid_pass = ['DeligoAdmin2026!', 'admin123', 'QrGQhRqGJH7RjUYNjGj6']
+                if username in valid_users and password in valid_pass:
+                    self._send_json({
+                        'success': True,
+                        'message': 'Authentication successful.',
+                        'token': 'dev_token_session_secure',
+                        'user': {'username': username, 'role': 'SUPER_ADMIN'}
+                    })
+                else:
+                    self._send_json({'success': False, 'message': 'Invalid executive credentials. Access denied.'}, 401)
+                return
+
             conn = sqlite3.connect(DB_FILE)
             cur = conn.cursor()
 
