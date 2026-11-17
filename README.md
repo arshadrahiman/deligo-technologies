@@ -102,6 +102,31 @@ You can open `frontend/index.html` directly in any web browser without starting 
 
 ---
 
+### Option 4: Deploy to GitHub Pages (Live Worldwide!)
+
+This repository is pre-configured with automated GitHub Actions and multi-mode support for **GitHub Pages**:
+
+#### Step 1: Link and Push to GitHub
+Create a new empty repository on [GitHub](https://github.com/new) (e.g. `it-startup-agency` or `deligo-technologies`), then run:
+```bash
+git remote add origin https://github.com/<your-github-username>/<your-repo-name>.git
+git branch -M main
+git push -u origin main
+```
+
+#### Step 2: Enable GitHub Pages in Repository Settings
+1. On GitHub, navigate to your repository's **Settings** tab.
+2. Click **Pages** in the left navigation sidebar.
+3. Under **Build and deployment > Source**:
+   - **Recommended (Zero Config)**: Select **GitHub Actions**. The included workflow (`.github/workflows/deploy.yml`) automatically builds and publishes the site on every push.
+   - **Alternative**: Select **Deploy from a branch** and choose branch `main` with folder `/docs`.
+4. Your website is live in ~60 seconds at:
+   **`https://<your-github-username>.github.io/<your-repo-name>/`**
+
+> **Static Hosting Delight**: On GitHub Pages, form submissions, the interactive Scope Estimator, status changes, CRM notes, and instant CSV downloads operate seamlessly with native browser persistence.
+
+---
+
 ## 🔌 API Endpoint Specifications
 
 | Endpoint | Method | Description |
