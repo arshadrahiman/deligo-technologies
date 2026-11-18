@@ -14,10 +14,8 @@ FILES_TO_INCLUDE = [
     # Core SPA Application
     ("index.html", "index.html"),
     ("app.bundle.js", "app.bundle.js"),
-    ("CNAME", "CNAME"),
     ("robots.txt", "robots.txt"),
     ("sitemap.xml", "sitemap.xml"),
-    (".nojekyll", ".nojekyll"),
     (".htaccess", ".htaccess"),
     ("README-HOSTING.txt", "README-HOSTING.txt"),
     ("admin/index.html", "admin/index.html"),

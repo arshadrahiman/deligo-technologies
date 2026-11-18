@@ -2,28 +2,37 @@
    DELIGO TECHNOLOGIES - PRODUCTION HOSTING & DEPLOYMENT INSTRUCTIONS
 ========================================================================
 
-DOMAIN: deligotechnologies.com
-HOSTING CONTROL PANEL: DirectAdmin / cPanel (https://cloud-da2.xdnscloud.com:2222/)
+PRODUCTION DOMAINS:
+  1. deligotechnologies.com
+  2. deligotechnologies.ae
+  3. deligotechnologies.ai
+
+HOSTING CONTROL PANEL: DirectAdmin (https://cloud-da2.xdnscloud.com:2222/)
+GITHUB PAGES URL: https://arshadrahiman.github.io/deligo-technologies/
 
 ------------------------------------------------------------------------
 1. EXTRACTION LOCATION IN DIRECTADMIN / CPANEL
 ------------------------------------------------------------------------
 In your DirectAdmin File Manager:
 1. Navigate to: domains -> deligotechnologies.com -> public_html
-   (Or directly into `public_html/`)
+   (Or into `public_html/` directly)
 2. Upload this ZIP package (`deligo-technologies-production.zip`).
 3. Click "Extract" to unpack all files directly inside `public_html/`.
 4. Ensure `index.html` is at the root of `public_html/`.
 
-Directory tree should look like:
+To support the additional domains (`deligotechnologies.ae` & `deligotechnologies.ai`):
+In DirectAdmin:
+- Go to "Account Manager" -> "Domain Pointers" (or "Domain Setup")
+- Add `deligotechnologies.ae` and `deligotechnologies.ai` as Domain Pointers / Aliases pointing to `deligotechnologies.com` with "Create as Alias" checked.
+- All three domains will serve the exact same high-performance platform!
+
+Directory tree in public_html:
 public_html/
 ├── index.html
 ├── app.bundle.js
 ├── .htaccess
-├── CNAME
 ├── robots.txt
 ├── sitemap.xml
-├── .nojekyll
 ├── admin/
 │   └── index.html
 ├── vendor/
@@ -38,6 +47,7 @@ public_html/
 │   └── export.php
 ├── config/
 │   ├── db.php
+│   ├── auth.php
 │   ├── schema.sql
 │   └── .htaccess
 └── data/
@@ -49,48 +59,30 @@ public_html/
 Your MySQL database has already been configured in `config/db.php`:
 - Database Name:     deligote_deligo_db
 - Database Username: deligote_deligo_db
-- Hostname:          localhost
+- Hostname:          localhost (with automatic fallback to 127.0.0.1 and cloud-da2.xdnscloud.com)
 - Tables: Auto-initialized on first enquiry or imported via `config/schema.sql`
-
-To manually import schema via phpMyAdmin (optional):
-- Open phpMyAdmin in DirectAdmin
-- Select `deligote_deligo_db`
-- Click "Import" -> Select `config/schema.sql` -> Click "Go"
 
 ------------------------------------------------------------------------
 3. SECRET OWNER / EXECUTIVE CRM ACCESS
 ------------------------------------------------------------------------
-IMPORTANT: As requested, the Owner CRM is completely HIDDEN from the public
-website. There are zero buttons, links, or visual cues on the public site.
+IMPORTANT: The Owner CRM is completely HIDDEN from the public website.
+There are zero buttons, links, or visual cues on the public site.
 
 To access the Executive CRM Portal:
 1. Open your browser and navigate directly to:
    https://deligotechnologies.com/#admin
-   OR
-   https://deligotechnologies.com/admin
+   (or https://deligotechnologies.ae/#admin or https://deligotechnologies.ai/#admin)
 
-2. An "Executive Portal - Restricted Access" login modal will appear.
-
-3. Enter your secure executive login credentials:
+2. Enter your secure executive login credentials:
    - Executive Username: admin   (or: owner)
-   - Secure Password:    DeligoAdmin2026!  (or: QrGQhRqGJH7RjUYNjGj6)
-
-4. Once authenticated:
-   - Full KPI Analytics (Pipeline value, conversion rates, leads count)
-   - Real-time Lead tracking (Status workflow: New, Contacted, In Discussion, Converted)
-   - Internal Note taking per enquiry
-   - 1-Click CSV Export for all client leads
-
-5. To log out:
-   - Click the "Sign Out" button in the top right of the dashboard.
-   - You will be immediately logged out and returned to the clean public homepage.
+   - Secure Password:    DeligoAdmin2026!
 
 ------------------------------------------------------------------------
-4. SSL / HTTPS CERTIFICATE
+4. GITHUB PAGES CONFIGURATION
 ------------------------------------------------------------------------
-In DirectAdmin:
-- Go to "SSL Certificates" -> Select "Free & automatic certificate from Let's Encrypt"
-- Check `deligotechnologies.com` and `www.deligotechnologies.com`
-- Click "Save"
-- Enable "Force SSL with https redirect"
+GitHub Pages is configured to run on your default GitHub Pages URL:
+  https://arshadrahiman.github.io/deligo-technologies/
+
+Custom domains (deligotechnologies.com, deligotechnologies.ae, deligotechnologies.ai)
+are strictly reserved for your hosting server and are NOT bound to GitHub Pages.
 ========================================================================

@@ -2176,7 +2176,7 @@ let compiledBody = res.code
     .replace(/var _jsxRuntime = require\("react\/jsx-runtime"\);\s*/, '');
 
 const finalBundle = bundleHeader + compiledBody + bundleFooter;
-const targets = ['app.bundle.js', 'frontend/app.bundle.js', 'docs/app.bundle.js'];
+const targets = ['app.bundle.js', 'frontend/app.bundle.js'];
 for (const t of targets) {
     fs.writeFileSync(t, finalBundle, 'utf-8');
     console.log('Successfully compiled and updated ' + t + ' (' + fs.statSync(t).size + ' bytes)');
