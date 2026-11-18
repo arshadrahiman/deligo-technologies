@@ -290,7 +290,11 @@ function App() {
     // Fetch live enquiries from backend API
     const refreshEnquiries = async () => {
         try {
-            const res = await fetch(\`\${API_BASE}/api/admin.php?action=list\`);
+            const token = sessionStorage.getItem("deligo_admin_token");
+            if (!token) return;
+            const res = await fetch(\`\${API_BASE}/api/admin.php?action=list\`, {
+                headers: { "Authorization": \`Bearer \${token}\` }
+            });
             if (res.ok) {
                 const data = await res.json();
                 if (data.success && Array.isArray(data.enquiries) && data.enquiries.length > 0) {
@@ -1310,6 +1314,7 @@ function EnquiryModal({ isOpen, onClose, initialService, onSubmitSuccess }) {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
+    const [honeypot, setHoneypot] = useState("");
 
     const budgetOptions = [
         "< $10,000",
@@ -1342,7 +1347,7 @@ function EnquiryModal({ isOpen, onClose, initialService, onSubmitSuccess }) {
             const res = await fetch(\`\${API_BASE}/api/enquiry.php\`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({ ...formData, website_hp: honeypot })
             });
             if (res.ok) {
                 const data = await res.json();
@@ -1406,6 +1411,16 @@ function EnquiryModal({ isOpen, onClose, initialService, onSubmitSuccess }) {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
+                    {/* Anti-Spam Bot Honeypot */}
+                    <input 
+                        type="text" 
+                        name="website_hp" 
+                        value={honeypot} 
+                        onChange={(e) => setHoneypot(e.target.value)} 
+                        tabIndex="-1" 
+                        autoComplete="off" 
+                        style={{ position: 'absolute', opacity: 0, zIndex: -1, pointerEvents: 'none', height: 0, width: 0 }} 
+                    />
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-xs font-semibold text-slate-300 mb-1.5">Your Full Name *</label>
@@ -1548,17 +1563,25 @@ function AdminLoginModal({ isOpen, onClose, onLoginSuccess, showToast }) {
             console.log("Checking master credentials...");
         }
 
-        // Master Verification (Works 100% on GitHub Pages, offline & direct access)
-        const validUsers = ["admin", "owner", "deligo_admin", "admin@deligotechnologies.com"];
-        const validPasswords = ["DeligoAdmin2026!", "admin123", "QrGQhRqGJH7RjUYNjGj6"];
+        // Cryptographic Verification for offline / GitHub Pages (Zero plaintext passwords stored)
+        try {
+            const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(password));
+            const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+            const validUsers = ["admin", "owner", "deligo_admin", "admin@deligotechnologies.com"];
+            const validHashes = [
+                "b73ffff97b578e5e00896a2512b6d91ca08ee0bb607b5a1148d6bd4f6f28ac77",
+                "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9"
+            ];
 
-        if (validUsers.includes(username.trim().toLowerCase()) && validPasswords.includes(password)) {
-            setIsSubmitting(false);
-            onLoginSuccess("master_token_" + Date.now());
-        } else {
-            setIsSubmitting(false);
-            setErrorMsg("Invalid executive credentials. Access denied.");
-        }
+            if (validUsers.includes(username.trim().toLowerCase()) && validHashes.includes(hash)) {
+                setIsSubmitting(false);
+                onLoginSuccess("master_offline_token_" + Date.now());
+                return;
+            }
+        } catch (e) {}
+
+        setIsSubmitting(false);
+        setErrorMsg("Invalid executive credentials. Access denied.");
     };
 
     return (
@@ -1688,9 +1711,13 @@ function OwnerDashboard({ isOpen, onClose, onLogout, enquiries, setEnquiries, on
 
     const handleUpdateStatus = async (id, newStatus) => {
         try {
+            const token = sessionStorage.getItem("deligo_admin_token");
             await fetch(\`\${API_BASE}/api/admin.php?action=update_status\`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    ...(token ? { "Authorization": \`Bearer \${token}\` } : {})
+                },
                 body: JSON.stringify({ id, status: newStatus })
             });
         } catch (err) {
@@ -1710,9 +1737,13 @@ function OwnerDashboard({ isOpen, onClose, onLogout, enquiries, setEnquiries, on
         setNewNoteText("");
 
         try {
+            const token = sessionStorage.getItem("deligo_admin_token");
             await fetch(\`\${API_BASE}/api/admin.php?action=add_note\`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    ...(token ? { "Authorization": \`Bearer \${token}\` } : {})
+                },
                 body: JSON.stringify({ enquiry_id: enquiryId, note: noteContent })
             });
         } catch (err) {
@@ -1769,7 +1800,8 @@ function OwnerDashboard({ isOpen, onClose, onLogout, enquiries, setEnquiries, on
             showToast("CSV export downloaded successfully!");
         } catch (err) {
             if (API_BASE) {
-                window.open(\`\${API_BASE}/api/export.php\`, '_blank');
+                const token = sessionStorage.getItem("deligo_admin_token") || "";
+                window.open(\`\${API_BASE}/api/export.php?token=\${encodeURIComponent(token)}\`, '_blank');
             }
         }
         setTimeout(() => setIsExporting(false), 800);
@@ -2143,5 +2175,9 @@ let compiledBody = res.code
     .replace(/^"use strict";\s*/, '')
     .replace(/var _jsxRuntime = require\("react\/jsx-runtime"\);\s*/, '');
 
-fs.writeFileSync('frontend/app.bundle.js', bundleHeader + compiledBody + bundleFooter);
-console.log('Successfully updated frontend/app.bundle.js (size:', fs.statSync('frontend/app.bundle.js').size, 'bytes)');
+const finalBundle = bundleHeader + compiledBody + bundleFooter;
+const targets = ['app.bundle.js', 'frontend/app.bundle.js', 'docs/app.bundle.js'];
+for (const t of targets) {
+    fs.writeFileSync(t, finalBundle, 'utf-8');
+    console.log('Successfully compiled and updated ' + t + ' (' + fs.statSync(t).size + ' bytes)');
+}

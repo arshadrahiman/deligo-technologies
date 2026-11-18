@@ -1,16 +1,14 @@
 <?php
 /**
- * Deligo Technologies - Public Enquiry API
- * Handles lead submissions from Website Contact Form & Interactive Estimator.
+ * Deligo Technologies - Hardened Public Enquiry API
+ * Features Honeypot Anti-Spam, Strict Input Length Clamping & Sanitization.
  */
 
-// Allow cross-origin requests from React frontend
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json; charset=UTF-8");
 
-// Handle CORS preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -26,32 +24,36 @@ require_once __DIR__ . '/../config/db.php';
 
 try {
     $rawInput = file_get_contents('php://input');
-    $data = json_decode($rawInput, true);
+    $data = json_decode($rawInput, true) ?: $_POST;
 
-    if (!$data) {
-        $data = $_POST;
+    // 1. Anti-Spam Honeypot Check (Bots fill hidden fields)
+    if (!empty($data['website_hp']) || !empty($_POST['website_hp'])) {
+        // Return fake success to deceive the bot without saving spam
+        http_response_code(200);
+        echo json_encode(['success' => true, 'message' => 'Enquiry submitted successfully.']);
+        exit();
     }
 
-    // Required fields validation
-    $fullName = trim($data['full_name'] ?? '');
-    $email = trim($data['email'] ?? '');
-    $phone = trim($data['phone'] ?? '');
-    $company = trim($data['company'] ?? '');
-    $service = trim($data['service'] ?? 'General Consultation');
-    $budget = trim($data['budget'] ?? 'Not specified');
-    $timeline = trim($data['timeline'] ?? 'Flexible');
-    $message = trim($data['message'] ?? '');
-    $source = trim($data['source'] ?? 'Website Form');
+    // 2. Field Clamping and Sanitization
+    $fullName = mb_substr(trim($data['full_name'] ?? ''), 0, 100);
+    $email = mb_substr(trim($data['email'] ?? ''), 0, 120);
+    $phone = mb_substr(trim($data['phone'] ?? ''), 0, 40);
+    $company = mb_substr(trim($data['company'] ?? ''), 0, 120);
+    $service = mb_substr(trim($data['service'] ?? 'General Consultation'), 0, 80);
+    $budget = mb_substr(trim($data['budget'] ?? 'Not specified'), 0, 50);
+    $timeline = mb_substr(trim($data['timeline'] ?? 'Flexible'), 0, 50);
+    $message = mb_substr(trim($data['message'] ?? ''), 0, 4000);
+    $source = mb_substr(trim($data['source'] ?? 'Website Form'), 0, 80);
 
     $errors = [];
-    if (empty($fullName)) {
-        $errors[] = 'Full name is required.';
+    if (empty($fullName) || mb_strlen($fullName) < 2) {
+        $errors[] = 'Please enter a valid full name (minimum 2 characters).';
     }
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = 'A valid email address is required.';
+        $errors[] = 'A valid corporate or personal email address is required.';
     }
-    if (empty($message)) {
-        $errors[] = 'Project description or message is required.';
+    if (empty($message) || mb_strlen($message) < 5) {
+        $errors[] = 'Please provide a project description (minimum 5 characters).';
     }
 
     if (!empty($errors)) {
@@ -64,7 +66,7 @@ try {
         exit();
     }
 
-    // Determine priority and estimated value based on budget
+    // 3. Lead Valuation Model
     $estimatedValue = 15000.00;
     $priority = 'MEDIUM';
     if (strpos($budget, '100,000') !== false || strpos($budget, '50,000 - $100,000') !== false) {
@@ -81,23 +83,13 @@ try {
     $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
 
     $pdo = Database::getConnection();
-    $stmt = $pdo->prepare("
-        INSERT INTO enquiries 
-        (full_name, email, phone, company, service, budget, timeline, message, status, priority, estimated_value, source, ip_address, created_at)
-        VALUES 
-        (:full_name, :email, :phone, :company, :service, :budget, :timeline, :message, 'NEW', :priority, :estimated_value, :source, :ip_address, datetime('now'))
-    ");
 
-    // Execute with MySQL / SQLite parameter compatibility
-    if (Database::getDriver() === 'mysql') {
-        $stmt = $pdo->prepare("
-            INSERT INTO enquiries 
+    $sql = "INSERT INTO enquiries 
             (full_name, email, phone, company, service, budget, timeline, message, status, priority, estimated_value, source, ip_address, created_at)
             VALUES 
-            (:full_name, :email, :phone, :company, :service, :budget, :timeline, :message, 'NEW', :priority, :estimated_value, :source, :ip_address, NOW())
-        ");
-    }
+            (:full_name, :email, :phone, :company, :service, :budget, :timeline, :message, 'NEW', :priority, :estimated_value, :source, :ip_address, CURRENT_TIMESTAMP)";
 
+    $stmt = $pdo->prepare($sql);
     $stmt->execute([
         ':full_name' => htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8'),
         ':email' => filter_var($email, FILTER_SANITIZE_EMAIL),
@@ -118,16 +110,15 @@ try {
     http_response_code(201);
     echo json_encode([
         'success' => true,
-        'message' => 'Your project enquiry has been submitted successfully! A Deligo technical director will contact you within 24 business hours.',
-        'enquiry_id' => (int)$enquiryId,
-        'database_driver' => Database::getDriver(),
+        'message' => 'Thank you! Your project brief has been received. Our technical team will reach out within 24 business hours.',
+        'enquiry_id' => (int)$enquiryId
     ]);
 
 } catch (Exception $e) {
+    error_log("Enquiry API error: " . $e->getMessage());
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Internal server error while saving enquiry: ' . $e->getMessage()
+        'message' => 'An unexpected server error occurred while processing your enquiry. Please try again or email contact@deligotechnologies.com directly.'
     ]);
 }
-

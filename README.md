@@ -1,148 +1,129 @@
-# DELIGO TECHNOLOGIES — Next-Gen IT Startup Agency Website & Owner CRM
+# DELIGO TECHNOLOGIES — Enterprise Software Engineering & Owner CRM
 
 > A premier, high-converting digital agency platform engineered with **React 18 + PHP + MySQL**, inspired by the design and technical excellence of **[Lilac Infotech](https://lilacinfotech.com)**.
 
 ---
 
-## 🌟 Key Highlights & Innovations
-
-1. **Client-Catchy & Innovative UI/UX**:
-   - Deep Cosmos theme with glassmorphism cards, glowing border accents, and responsive typography.
-   - **Interactive Particle Network Canvas**: Dynamic connected nodes that react in real-time to user mouse movements.
-   - **Interactive Project Cost & Scope Estimator**: Allows prospective clients to select platform, feature modules, and timeline to receive an instant investment and squad estimate, then pre-populates the lead form with 1 click.
-   - **Agile Engineering Roadmap**: 5-step visual delivery pipeline (Discovery -> UI/UX -> Agile Sprints -> QA & Security -> Global Scale).
-   - **Interactive Tech Stack Matrix**: Filterable badges covering Frontend, Backend & DB, Mobile (Flutter/React Native/iOS/Android), and Enterprise AI / Cloud.
-   - **Client Showcases & Testimonials**: Metric-driven case studies (+340% User Growth, $1.4B Volume) and verified 5-star Clutch reviews.
-
-2. **Company Owner / Executive Dashboard (Enquiry Tracker & CRM)**:
-   - **Real-time KPI Metrics**: Total Inbound Leads, New/Unread leads requiring <24h response, Deals in Negotiation, Won Deals, and Total Pipeline Dollar Value.
-   - **Lifecycle Status Workflow**: Instant status changes (`NEW` → `CONTACTED` → `IN_DISCUSSION` → `PROPOSAL_SENT` → `CONVERTED` → `ARCHIVED`).
-   - **Client Dossier Modal**: Inspect full project description, budget, timeline, with 1-click Email, WhatsApp chat, and phone launcher.
-   - **CRM Activity Notes**: Allows founders and account managers to write timestamped internal notes.
-   - **CSV Export Engine**: 1-click export of all enquiries formatted for Excel & Google Sheets.
-
-3. **Robust Backend Architecture (PHP + MySQL + Auto-Fallback)**:
-   - **PDO MySQL Connection** with parameterization against SQL injection.
-   - **Smart Auto-Fallback to SQLite**: If MySQL isn't running on your local machine yet, the API seamlessly auto-initializes a local SQLite database (`backend/data/deligo.sqlite`) and seeds it with sample enterprise leads, so you can test everything immediately without any database setup errors!
-   - RESTful JSON endpoints with CORS headers, validation, and sanitization.
-
----
-
-## 📁 Project Directory Structure
+## 🌟 Architecture Overview
 
 ```text
-it-startup-agency/
-├── frontend/
-│   ├── index.html              # Standalone, 1-click browser-ready React 18 production bundle
-│   ├── package.json            # Node/Vite dependencies (for npm run dev / build)
-│   ├── vite.config.js          # Vite config with API proxy
-│   └── src/
-│       ├── App.jsx             # Main React Application
-│       ├── services/
-│       │   └── api.js          # REST API Client
-│       └── components/         # Modular React components
-├── backend/
-│   ├── api/
-│   │   ├── enquiry.php         # Public Lead Submission endpoint (POST)
-│   │   ├── admin.php           # Owner CRM Dashboard API (GET, POST, PUT)
-│   │   └── export.php          # CSV Lead Export engine
-│   ├── config/
-│   │   ├── db.php              # PDO Database Connection (MySQL + SQLite fallback)
-│   │   └── schema.sql          # MySQL Schema & Seed Data
-│   ├── dev_server.py           # Zero-setup Python companion dev server
-│   └── router.php              # PHP built-in server router
-└── README.md
+deligo-technologies/
+├── index.html                   # Webroot SPA application (Zero-redirect entry point)
+├── app.bundle.js                # Pre-compiled React 18 production bundle (Zero-CDN, zero plain secrets)
+├── .htaccess                    # Enterprise Apache security headers, Gzip, and routing
+├── CNAME                        # Custom domain mapping (deligotechnologies.com)
+├── robots.txt                   # Search crawler directives
+├── sitemap.xml                  # XML Sitemap for search engines
+├── README.md                    # Project documentation
+├── SECURITY.md                  # Security architecture, policy & audit disclosures
+├── README-HOSTING.txt           # DirectAdmin & cPanel hosting instructions
+│
+├── admin/                       # Executive CRM portal gateway
+│   └── index.html               # Seamless router to /#admin
+│
+├── vendor/                      # Offline, self-contained local dependencies
+│   ├── react.min.js             # React 18 Core
+│   ├── react-dom.min.js         # React 18 DOM Renderer
+│   ├── tailwind.min.js          # Tailwind CSS Compiler
+│   ├── icons.js                 # Native Lucide SVG Icon definitions
+│   └── confetti.min.js          # Canvas Confetti Particle FX
+│
+├── backend/                     # Canonical Backend Source
+│   ├── api/                     # Hardened REST API Endpoints
+│   │   ├── enquiry.php          # Public lead submission (Honeypot + Validation)
+│   │   ├── admin.php            # Executive CRM API (HMAC Bearer token protected)
+│   │   └── export.php           # CSV Lead Export engine (Token authenticated)
+│   ├── config/                  # Database & Authentication Layer
+│   │   ├── db.php               # Multi-host failover PDO manager (MySQL + SQLite)
+│   │   ├── auth.php             # Stateless HMAC-SHA256 Token Manager
+│   │   ├── schema.sql           # MySQL database schema & seed data
+│   │   └── .htaccess            # Enforced Require all denied
+│   ├── data/                    # Protected Local Data Store
+│   │   ├── deligo.sqlite        # Development SQLite database
+│   │   └── .htaccess            # Enforced Require all denied
+│   └── dev_server.py            # Local zero-dependency Python API & dev server
+│
+├── docs/                        # GitHub Pages automated deployment target
+│   ├── index.html
+│   ├── app.bundle.js
+│   ├── admin/
+│   ├── vendor/
+│   ├── CNAME
+│   └── .nojekyll
+│
+└── scripts/                     # Automation & Tooling
+    ├── build.js                 # Babel JSX compiler & multi-target bundle distributor
+    ├── package.py               # Production zip package generator
+    └── test_security.js         # Playwright automated security & regression test suite
 ```
 
 ---
 
-## 🚀 How to Run the Project (3 Simple Methods)
+## 🔒 Security Hardening Highlights
 
-### Option 1: Instant Local Dev Server (Zero Configuration Needed!)
-Using macOS's built-in Python 3, you can launch the live frontend and SQLite backend simultaneously with a single command:
+1. **Zero-Trace Confidential Executive CRM**:
+   - The public website contains **zero visual links, buttons, or clues** to the administrative CRM.
+   - Access is restricted strictly to direct URL paths:
+     - `https://deligotechnologies.com/#admin`
+     - `https://deligotechnologies.com/admin`
+   - Access requires authentication via the **Executive Portal Gate** (Username: `admin` | Password: `DeligoAdmin2026!`).
 
+2. **Stateless HMAC-SHA256 Bearer Token Verification**:
+   - All protected endpoints (`/api/admin.php`, `/api/export.php`) require a cryptographically signed HMAC-SHA256 token.
+   - Missing, expired, or tampered tokens return `401 Unauthorized`.
+
+3. **Anti-Spam Bot Honeypot Defense**:
+   - The enquiry form embeds an invisible honeypot trap (`website_hp`) that neutralizes automated spam submissions without database execution.
+
+4. **Zero Secrets in Client Code**:
+   - Database credentials and plaintext passwords have been purged from all client bundles.
+   - Static fallbacks use one-way WebCrypto SHA-256 digests.
+
+5. **Server & Directory Protection (`.htaccess`)**:
+   - Blocks direct HTTP access to configuration, database, SQLite, and sensitive files.
+   - Enforces enterprise security headers: `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`.
+
+---
+
+## 🚀 Development & Build Workflows
+
+### Run the Development Server
 ```bash
-cd /Users/arshadulrahman/.gemini/antigravity/scratch/it-startup-agency/backend
-python3 dev_server.py 8085
+python3 backend/dev_server.py
+# Server starts automatically at http://localhost:8085
 ```
-Open **`http://localhost:8085`** in Google Chrome or Safari.
-- Website & Animations will be live!
-- Form submissions will store directly into the database.
-- Click **"👑 Owner CRM"** in the top bar to test the dashboard.
 
----
-
-### Option 2: Run with PHP & MySQL
-
-#### 1. Import MySQL Database:
+### Recompile the Production Bundle
 ```bash
-mysql -u root -p < /Users/arshadulrahman/.gemini/antigravity/scratch/it-startup-agency/backend/config/schema.sql
+node scripts/build.js
+# Automatically compiles and syncs app.bundle.js across webroot, frontend, and docs
 ```
 
-#### 2. Configure Credentials:
-Edit `backend/config/db.php` or set environment variables:
+### Run the Security Test Suite
 ```bash
-export DB_HOST="127.0.0.1"
-export DB_PORT="3306"
-export DB_NAME="deligo_db"
-export DB_USER="root"
-export DB_PASS="your_password"
+node scripts/test_security.js
+# Runs 6 automated Playwright tests verifying zero-trace public UI, honeypot, auth gate, and sign-out
 ```
 
-#### 3. Start PHP Server:
+### Generate Production Hosting ZIP
 ```bash
-cd /Users/arshadulrahman/.gemini/antigravity/scratch/it-startup-agency
-php -S localhost:8000 backend/router.php
+python3 scripts/package.py
+# Generates deligo-technologies-production.zip ready to extract in public_html/
 ```
 
 ---
 
-### Option 3: Double-Click Standalone Frontend
-You can open `frontend/index.html` directly in any web browser without starting any server. It features mock demo data pre-loaded so you can evaluate all animations, calculations, and the owner dashboard immediately.
+## 🌐 Production Hosting Deployment (DirectAdmin / cPanel)
+
+1. Upload `deligo-technologies-production.zip` to your hosting server.
+2. In File Manager, extract the archive directly inside `public_html/`.
+3. The database connection in `config/db.php` is pre-configured with automatic multi-host connection (`localhost` ➔ `127.0.0.1` ➔ `cloud-da2.xdnscloud.com`).
+4. Point your domain registrar nameservers to:
+   - `dns1.xdnscloud.com`
+   - `dns2.xdnscloud.com`
 
 ---
 
-### Option 4: Deploy to GitHub Pages (Live Worldwide!)
-
-This repository is pre-configured with automated GitHub Actions and multi-mode support for **GitHub Pages**:
-
-#### Step 1: Link and Push to GitHub
-Create a new repository named **`deligo-technologies`** on [GitHub](https://github.com/new), then run:
-```bash
-git remote add origin https://github.com/<your-github-username>/deligo-technologies.git
-git branch -M main
-git push -u origin main
-```
-*(For user `arshadrahiman`, the remote URL is: `https://github.com/arshadrahiman/deligo-technologies.git`)*
-
-#### Step 2: Enable GitHub Pages in Repository Settings
-1. On GitHub, navigate to your repository's **Settings** tab.
-2. Click **Pages** in the left navigation sidebar.
-3. Under **Build and deployment > Source**:
-   - **Recommended (Zero Config)**: Select **GitHub Actions**. The included workflow (`.github/workflows/deploy.yml`) automatically publishes the site on every push.
-   - **Alternative**: Select **Deploy from a branch** and choose branch `main` with folder `/docs`.
-4. Your website will be live in ~60 seconds at:
-   **`https://<your-github-username>.github.io/deligo-technologies/`**
-
-> **Static Hosting Delight**: On GitHub Pages, form submissions, the interactive Scope Estimator, status changes, CRM notes, and instant CSV downloads operate seamlessly with native browser persistence.
-
----
-
-## 🔌 API Endpoint Specifications
-
-| Endpoint | Method | Description |
-| :--- | :--- | :--- |
-| `/api/enquiry.php` | `POST` | Public lead submission form. Accepts `full_name`, `email`, `phone`, `company`, `service`, `budget`, `message`. |
-| `/api/admin.php?action=list` | `GET` | Fetches leads with optional filters `status`, `service`, `search`. |
-| `/api/admin.php?action=stats`| `GET` | Returns aggregated metrics (Total, New, In Discussion, Converted, Pipeline Value). |
-| `/api/admin.php?action=update_status` | `POST` | Updates lead pipeline status (`NEW`, `CONTACTED`, `IN_DISCUSSION`, `PROPOSAL_SENT`, `CONVERTED`, `ARCHIVED`). |
-| `/api/admin.php?action=add_note` | `POST` | Appends internal CRM activity note to a lead. |
-| `/api/export.php` | `GET` | Generates and downloads a `.csv` file with all client inquiries. |
-
----
-
-## 🎨 Inspired by Lilac Infotech's DNA
-- **High-Impact Value Proposition**: Focused on custom software, enterprise AI, mobile apps, and scalable web architectures.
-- **Client Conversion Focus**: Interactive scope calculator and high-urgency CTAs.
-- **Owner Visibility**: Built-in CRM tracking tailored for startup founders to never let a high-value lead slip through the cracks.
-
+## 📄 License & Credits
+© 2026 DELIGO TECHNOLOGIES. All rights reserved.
+Built with React 18, Tailwind CSS, Lucide Icons, and PHP MySQL Architecture.

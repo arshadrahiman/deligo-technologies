@@ -271,7 +271,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
                 username = data.get('username', '').strip().lower()
                 password = data.get('password', '')
                 valid_users = ['admin', 'owner', 'deligo_admin', 'admin@deligotechnologies.com']
-                valid_pass = ['DeligoAdmin2026!', 'admin123', 'QrGQhRqGJH7RjUYNjGj6']
+                valid_pass = ['DeligoAdmin2026!', 'admin123']
                 if username in valid_users and password in valid_pass:
                     self._send_json({
                         'success': True,
