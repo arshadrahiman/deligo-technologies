@@ -1,6 +1,6 @@
 # DELIGO TECHNOLOGIES — Enterprise Software Engineering & Owner CRM
 
-> A premier, high-converting digital agency platform engineered with **React 18 + PHP + MySQL**, inspired by the design and technical excellence of **[Lilac Infotech](https://lilacinfotech.com)**.
+
 
 ---
 
